@@ -143,12 +143,21 @@ export default function Dashboard() {
   }, [applications, searchTerm, statusFilter]);
 
   // Hitung Statistik Card Ringkasan
-  const { totalStats, appliedStats, interviewStats, offerStats } = useMemo(
+  const { totalStats, appliedStats, interviewStats, offerStats, rejectedStats } = useMemo(
     () => ({
       totalStats: filteredApplications.length,
-      appliedStats: filteredApplications.filter((a) => a.status === "Applied").length,
-      interviewStats: filteredApplications.filter((a) => a.status === "Interview").length,
-      offerStats: filteredApplications.filter((a) => ["Offering", "Offer", "Diterima"].includes(a.status)).length,
+      appliedStats: filteredApplications.filter(
+        (a) => a.status === "Applied",
+      ).length,
+      interviewStats: filteredApplications.filter(
+        (a) => a.status === "Interview",
+      ).length,
+      offerStats: filteredApplications.filter((a) =>
+        ["Offering", "Offer", "Diterima"].includes(a.status),
+      ).length,
+      rejectedStats: filteredApplications.filter((a) =>
+        ["Rejected", "Ditolak"].includes(a.status),
+      ).length,
     }),
     [filteredApplications],
   );
@@ -183,25 +192,25 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="dashboard-light min-h-screen bg-white text-neutral-900 font-mono select-none">
+    <div className="dashboard-light min-h-screen bg-neutral-50 text-neutral-900 font-mono select-none">
       <Navbar />
 
-      <main className="max-w-[1600px] mx-auto p-6 pt-24 space-y-6">
+      <main className="max-w-[1600px] mx-auto p-6 pt-24 space-y-6 min-h-[calc(100vh-72px)]">
         {/* ================= CARD RINGKASAN STATISTIK (DIBALIKIN) ================= */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-xs">
+          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
             <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
               TOTAL TUGAS / LAMARAN
             </p>
             <p className="text-2xl font-bold text-white">{totalStats}</p>
           </div>
-          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg">
+          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
             <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
               IN PROGRESS (APPLIED)
             </p>
             <p className="text-2xl font-bold text-blue-400">{appliedStats}</p>
           </div>
-          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg">
+          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
             <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
               TAHAP INTERVIEW
             </p>
@@ -209,11 +218,17 @@ export default function Dashboard() {
               {interviewStats}
             </p>
           </div>
-          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg">
+          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
             <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
               SELESAI (OFFER)
             </p>
             <p className="text-2xl font-bold text-emerald-400">{offerStats}</p>
+          </div>
+          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
+            <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
+              DITOLAK
+            </p>
+            <p className="text-2xl font-bold text-red-400">{rejectedStats}</p>
           </div>
         </div>
 
@@ -510,16 +525,16 @@ export default function Dashboard() {
                 Belum ada data lamaran.
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
+             <div className="overflow-x-auto sm:overflow-x-visible">
+                <table className="w-full text-left border-collapse text-xs min-w-[720px]">
                   <thead>
-                    <tr className="border-b border-neutral-800 bg-neutral-950 text-neutral-400 uppercase font-bold text-[10px] tracking-wider">
+                    <tr className="sticky top-0 z-20 border-b border-neutral-800 bg-neutral-950 text-neutral-400 uppercase font-bold text-[10px] tracking-wider shadow-md">
                       <th className="py-3 px-4">Perusahaan / Tugas</th>
                       <th className="py-3 px-4">Posisi</th>
                       <th className="py-3 px-4">Lokasi</th>
-                       <th className="py-3 px-4">Platform</th>
-                       <th className="py-3 px-4">Tanggal Apply</th>
-                       <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4">Platform</th>
+                      <th className="py-3 px-4">Tanggal Apply</th>
+                      <th className="py-3 px-4">Status</th>
                       <th className="py-3 px-4 text-right">Aksi</th>
                     </tr>
                   </thead>

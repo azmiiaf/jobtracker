@@ -37,7 +37,22 @@ html.light body {
 
 html.light [class~="bg-neutral-950"],
 html.light [class~="bg-neutral-900"] {
-  background-color: #fff !important;
+  background-color: #f4f4f5 !important;
+}
+
+html.light [class~="bg-[#0d0d0d]"],
+html.light [class~="bg-[#121212]"],
+html.light [class~="bg-[#0f2847]"],
+html.light [class~="bg-[#0b3321]"],
+html.light [class~="bg-[#381111]"],
+html.light [class~="bg-[#1a1a1a]"] {
+  background-color: #f4f4f5 !important;
+}
+
+/* thead / header-grid tetap sedikit gelap di mode light agar kontras & tak "menutupi" tabel */
+html.light thead.bg-neutral-950,
+html.light thead.bg-neutral-900 {
+  background-color: #e5e7eb !important;
 }
 
 html.light [class~="text-white"] {
@@ -111,8 +126,8 @@ button:disabled {
 }
 
 ::selection {
-  background: #fff;
-  color: #000;
+  background: #9ca3af;
+  color: #171717;
 }
 
 ::-webkit-scrollbar {
@@ -121,14 +136,14 @@ button:disabled {
 }
 
 ::-webkit-scrollbar-track {
-  background: #080808;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3a3a3a;
-  border: 2px solid #080808;
+  background: #6b7280;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #666;
+  background: #4b5563;
 }
