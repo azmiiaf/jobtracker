@@ -1,0 +1,19 @@
+{
+  "name": "JobTracker",
+  "short_name": "JobTracker",
+  "description": "Kelola lamaran kerja, status rekrutmen, CV, dan riwayat proses.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "lang": "id-ID",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

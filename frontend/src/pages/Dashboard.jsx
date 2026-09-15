@@ -1,0 +1,577 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Navbar from "../components/layout/Navbar";
+import CreateApplicationModal from "../components/ui/CreateApplicationModal";
+import {
+  getApplications,
+  deleteApplication,
+  updateApplication,
+} from "../services/applicationService";
+
+const statusBadgeStyles = {
+  Applied: "border-blue-500/50 bg-blue-500/10 text-blue-300",
+  Interview: "border-yellow-500/50 bg-yellow-500/10 text-yellow-300",
+  Offering: "border-emerald-500/50 bg-emerald-500/10 text-emerald-300",
+  Offer: "border-emerald-500/50 bg-emerald-500/10 text-emerald-300",
+  Offered: "border-emerald-500/50 bg-emerald-500/10 text-emerald-300",
+  Diterima: "border-emerald-500/50 bg-emerald-500/10 text-emerald-300",
+  Rejected: "border-red-500/50 bg-red-500/10 text-red-300",
+  Ditolak: "border-red-500/50 bg-red-500/10 text-red-300",
+};
+
+// Helper Generate 14 Hari Kalender Timeline Gantt
+const generateTimelineDates = () => {
+  const dates = [];
+  const today = new Date();
+
+  // Ambil mulai 2 hari lalu agar timeline seimbang
+  const startDate = new Date(today);
+  startDate.setDate(today.getDate() - 2);
+
+  const dayNames = ["MIN", "SEN", "SEL", "RAB", "KAM", "JUM", "SAB"];
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "Mei",
+    "Jun",
+    "Jul",
+    "Agu",
+    "Sep",
+    "Okt",
+    "Nov",
+    "Des",
+  ];
+
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
+    dates.push({
+      fullDate: d,
+      dateKey: d.toISOString().split("T")[0],
+      dayName: dayNames[d.getDay()],
+      dateLabel: `${d.getDate()} ${monthNames[d.getMonth()]}`,
+    });
+  }
+  return dates;
+};
+
+export default function Dashboard() {
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  // Switcher Mode View: 'gantt' (Timeline), 'board', 'table'
+  const [viewMode, setViewMode] = useState("table");
+
+  // Filter & Search
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  // 14 Hari Kolender Timeline
+  const timelineDates = generateTimelineDates();
+
+  const fetchApplications = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await getApplications();
+      const list = Array.isArray(data)
+        ? data
+        : data.applications || data.data || [];
+      setApplications(list);
+    } catch (err) {
+      console.error("Fetch Error:", err);
+      setError("Gagal memuat data dari server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchApplications();
+  }, []);
+
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      await updateApplication(id, { status: newStatus });
+      setApplications((prev) =>
+        prev.map((app) =>
+          (app.id || app._id) === id ? { ...app, status: newStatus } : app,
+        ),
+      );
+    } catch (err) {
+      alert("Gagal memperbarui status.");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Apakah Anda yakin ingin menghapus data ini?")) return;
+    try {
+      await deleteApplication(id);
+      setApplications((prev) =>
+        prev.filter((app) => (app.id || app._id) !== id),
+      );
+    } catch (err) {
+      alert("Gagal menghapus data.");
+    }
+  };
+
+  const filteredApplications = applications.filter((app) => {
+    const company = (app.company_name || app.company || "").toLowerCase();
+    const position = (app.position || app.job_title || "").toLowerCase();
+    const search = searchTerm.toLowerCase();
+
+    const matchesSearch = company.includes(search) || position.includes(search);
+    const matchesStatus = statusFilter === "" || app.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  // Hitung Statistik Card Ringkasan
+  const totalStats = applications.length;
+  const appliedStats = applications.filter(
+    (a) => a.status === "Applied",
+  ).length;
+  const interviewStats = applications.filter(
+    (a) => a.status === "Interview",
+  ).length;
+  const offerStats = applications.filter((a) =>
+    ["Offering", "Offer", "Diterima"].includes(a.status),
+  ).length;
+
+  // Hitung Posisi Gantt Grid Bar
+  const getBarPosition = (appliedDateStr, status) => {
+    let startIndex = 2;
+    let durationDays = 5;
+
+    if (appliedDateStr) {
+      const appDate = new Date(appliedDateStr).toISOString().split("T")[0];
+      const foundIdx = timelineDates.findIndex((d) => d.dateKey === appDate);
+      if (foundIdx !== -1) {
+        startIndex = foundIdx;
+      }
+    }
+
+    if (["Offering", "Offer", "Diterima"].includes(status)) {
+      durationDays = 7;
+    } else if (status === "Interview") {
+      durationDays = 5;
+    } else if (status === "Rejected" || status === "Ditolak") {
+      durationDays = 3;
+    } else {
+      durationDays = 6;
+    }
+
+    const gridStart = startIndex + 2; // +2 karena Kolom 1 = NAMA TUGAS
+    const gridEnd = Math.min(gridStart + durationDays, 16);
+
+    return { gridStart, gridEnd };
+  };
+
+  return (
+    <div className="dashboard-light min-h-screen bg-white text-neutral-900 font-mono select-none">
+      <Navbar />
+
+      <main className="max-w-[1600px] mx-auto p-6 pt-24 space-y-6">
+        {/* ================= CARD RINGKASAN STATISTIK (DIBALIKIN) ================= */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg">
+            <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
+              TOTAL TUGAS / LAMARAN
+            </p>
+            <p className="text-2xl font-bold text-white">{totalStats}</p>
+          </div>
+          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg">
+            <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
+              IN PROGRESS (APPLIED)
+            </p>
+            <p className="text-2xl font-bold text-blue-400">{appliedStats}</p>
+          </div>
+          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg">
+            <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
+              TAHAP INTERVIEW
+            </p>
+            <p className="text-2xl font-bold text-yellow-400">
+              {interviewStats}
+            </p>
+          </div>
+          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg">
+            <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
+              SELESAI (OFFER)
+            </p>
+            <p className="text-2xl font-bold text-emerald-400">{offerStats}</p>
+          </div>
+        </div>
+
+        {/* TOOLBAR PENCARIAN, FILTER, SWITCHER & BTN TAMBAH */}
+        <div className="flex flex-col md:flex-row gap-3 justify-between items-center">
+          <div className="flex flex-wrap sm:flex-nowrap gap-3 w-full md:w-auto flex-1">
+            <input
+              type="text"
+              placeholder="Cari tugas / perusahaan..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-white border border-neutral-300 rounded-lg px-4 py-2 text-xs text-neutral-900 focus:outline-none focus:border-black placeholder:text-neutral-500"
+            />
+            <select
+              value={statusFilter}
+              style={{fontSize: '.6rem'}}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="bg-white border border-neutral-300 rounded-lg px-2.5 py-1.5 text-neutral-900 focus:outline-none focus:border-black uppercase font-bold"
+            >
+              <option value="">SEMUA STATUS</option>
+              <option value="Applied">APPLIED</option>
+              <option value="Interview">INTERVIEW</option>
+              <option value="Offering">OFFER</option>
+              <option value="Rejected">REJECTED</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+            <div className="flex bg-white border border-neutral-300 p-1 rounded-lg text-xs font-bold">
+              <button
+                onClick={() => setViewMode("table")}
+                className={`px-3 py-1.5 rounded-md transition ${
+                  viewMode === "table"
+                    ? "bg-black text-white"
+                    : "text-neutral-600 hover:bg-neutral-100 hover:text-black"
+                }`}
+              >
+                📋 TABEL
+              </button>
+              <button
+                onClick={() => setViewMode("gantt")}
+                className={`px-3 py-1.5 rounded-md transition ${
+                  viewMode === "gantt"
+                    ? "bg-black text-white"
+                    : "text-neutral-600 hover:bg-neutral-100 hover:text-black"
+                }`}
+              >
+                📊 TIMELINE PROYEK
+              </button>
+              <button
+                onClick={() => setViewMode("board")}
+                className={`px-3 py-1.5 rounded-md transition ${
+                  viewMode === "board"
+                    ? "bg-black text-white"
+                    : "text-neutral-600 hover:bg-neutral-100 hover:text-black"
+                }`}
+              >
+                🗂️ BOARD
+              </button>
+            </div>
+
+            <button
+              onClick={() => setIsModalOpen(true)}
+              style={{ fontSize: ".7rem" }}
+              className="px-3.5 py-2 bg-black text-white font-bold rounded-lg hover:bg-neutral-800 transition cursor-pointer whitespace-nowrap uppercase tracking-wider"
+            >
+              + TAMBAH TUGAS
+            </button>
+          </div>
+        </div>
+
+        {error && (
+          <div className="p-4 bg-red-950/50 border border-red-900 text-red-400 text-xs rounded-xl">
+            {error}
+          </div>
+        )}
+
+        {/* ================= MODE 1: GANTT CHART (GRID TIMELINE PROYEK) ================= */}
+        {viewMode === "gantt" && (
+          <div className="bg-[#0d0d0d] border border-neutral-800 rounded-2xl p-6 shadow-2xl space-y-6 overflow-hidden">
+            {/* Header + Legend persis screenshot */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <h1 className="text-xl font-bold text-white tracking-tight">
+                  Timeline Proyek
+                </h1>
+                <p className="text-xs text-neutral-400 mt-0.5">
+                  Visualisasi jadwal tugas dan durasi
+                </p>
+              </div>
+
+              <div className="flex items-center gap-6 text-[11px] font-bold tracking-wider">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block shadow-sm shadow-blue-500"></span>
+                  <span className="text-neutral-300">IN PROGRESS</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shadow-sm shadow-emerald-500"></span>
+                  <span className="text-neutral-300">SELESAI</span>
+                </div>
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="py-16 text-center text-neutral-500 text-xs">
+                Memuat timeline proyek...
+              </div>
+            ) : filteredApplications.length === 0 ? (
+              <div className="py-16 text-center text-neutral-500 text-xs">
+                Belum ada data tugas.
+              </div>
+            ) : (
+              <div className="overflow-x-auto border border-neutral-800 rounded-xl bg-neutral-950">
+                <div className="min-w-[1200px]">
+                  {/* Grid Header Tanggal */}
+                  <div className="grid grid-cols-[220px_repeat(14,minmax(80px,1fr))] border-b border-neutral-800 bg-[#121212]">
+                    <div className="p-3 text-[11px] font-extrabold text-neutral-300 uppercase tracking-wider flex items-center border-r border-neutral-800">
+                      NAMA TUGAS
+                    </div>
+                    {timelineDates.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="p-2.5 text-center border-r border-neutral-800/80 last:border-r-0 flex flex-col justify-center items-center"
+                      >
+                        <span className="text-[10px] font-extrabold text-neutral-400 uppercase tracking-wider">
+                          {item.dayName}
+                        </span>
+                        <span className="text-xs font-bold text-white mt-0.5">
+                          {item.dateLabel}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Grid Rows Data */}
+                  <div className="divide-y divide-neutral-800/80">
+                    {filteredApplications.map((app) => {
+                      const appId = app.id || app._id;
+                      const taskName =
+                        app.company_name ||
+                        app.company ||
+                        app.position ||
+                        "Tugas Baru";
+                      const status = app.status || "Applied";
+                      const { gridStart, gridEnd } = getBarPosition(
+                        app.applied_date,
+                        status,
+                      );
+
+                      const isDone = ["Offering", "Offer", "Diterima"].includes(
+                        status,
+                      );
+                      const isRejected =
+                        status === "Rejected" || status === "Ditolak";
+                      let barStyle =
+                        "bg-[#0f2847] border-blue-500 text-blue-200";
+                      let statusLabel = "Running";
+
+                      if (isDone) {
+                        barStyle =
+                          "bg-[#0b3321] border-emerald-500 text-emerald-200";
+                        statusLabel = "Selesai";
+                      } else if (isRejected) {
+                        barStyle = "bg-[#381111] border-red-500 text-red-200";
+                        statusLabel = "Closed";
+                      }
+
+                      return (
+                        <div
+                          key={appId}
+                          className="grid grid-cols-[220px_repeat(14,minmax(80px,1fr))] relative items-center hover:bg-neutral-900/40 transition"
+                        >
+                          <div className="p-4 text-xs font-semibold text-neutral-200 border-r border-neutral-800 truncate z-10 bg-neutral-950 h-full flex items-center">
+                            {taskName}
+                          </div>
+
+                          {timelineDates.map((_, colIdx) => (
+                            <div
+                              key={colIdx}
+                              className="h-14 border-r border-neutral-800/40 last:border-r-0"
+                            ></div>
+                          ))}
+
+                          <div
+                            style={{
+                              gridColumnStart: gridStart,
+                              gridColumnEnd: gridEnd,
+                            }}
+                            className={`absolute left-1 right-1 h-9 rounded-xl border ${barStyle} px-3 flex items-center shadow-lg transition-all duration-300 z-0`}
+                          >
+                            <span className="text-[11px] font-semibold tracking-wide truncate">
+                              {statusLabel}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= MODE 2: KANBAN BOARD ================= */}
+        {viewMode === "board" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+            {["Applied", "Interview", "Offer", "Rejected"].map((colKey) => {
+              const itemsInCol = filteredApplications.filter((app) => {
+                if (colKey === "Offering")
+                  return ["Offering", "Offer", "Diterima"].includes(app.status);
+                if (colKey === "Rejected")
+                  return app.status === "Rejected" || app.status === "Ditolak";
+                return app.status === colKey;
+              });
+
+              return (
+                <div
+                  key={colKey}
+                  className="bg-[#0d0d0d] border border-neutral-800 rounded-xl p-4 flex flex-col min-h-[450px]"
+                >
+                  <div className="flex justify-between items-center pb-3 mb-3 border-b border-neutral-800">
+                    <h3 className="font-bold text-xs tracking-wider text-white uppercase">
+                      {colKey}
+                    </h3>
+                    <span className="text-[10px] px-2 py-0.5 bg-neutral-800 text-neutral-400 rounded font-bold border border-neutral-700">
+                      {itemsInCol.length}
+                    </span>
+                  </div>
+
+                  <div className="space-y-3 flex-1 overflow-y-auto">
+                    {itemsInCol.length === 0 ? (
+                      <div className="h-28 flex items-center justify-center border border-dashed border-neutral-800/80 rounded-lg text-neutral-600 text-[11px]">
+                        Kosong
+                      </div>
+                    ) : (
+                      itemsInCol.map((app) => {
+                        const appId = app.id || app._id;
+                        return (
+                          <div
+                            key={appId}
+                            className="bg-neutral-950 border border-neutral-800 p-3.5 rounded-lg space-y-3"
+                          >
+                            <div>
+                              <div className="font-bold text-white text-xs">
+                                {app.company_name || app.company}
+                              </div>
+                              <div className="text-neutral-400 text-[11px]">
+                                {app.position || app.job_title}
+                              </div>
+                            </div>
+
+                            <div className="pt-2 border-t border-neutral-900 flex justify-between items-center">
+                              <select
+                                value={app.status || "Applied"}
+                                onChange={(e) =>
+                                  handleStatusChange(appId, e.target.value)
+                                }
+                                className="bg-neutral-900 border border-neutral-800 text-neutral-300 text-[10px] rounded px-1.5 py-1 uppercase focus:outline-none"
+                              >
+                                <option value="Applied">Applied</option>
+                                <option value="Interview">Interview</option>
+                                <option value="Offering">Offer</option>
+                                <option value="Rejected">Rejected</option>
+                              </select>
+
+                              <button
+                                onClick={() => handleDelete(appId)}
+                                className="px-2 py-1 bg-red-950/60 border border-red-900 text-red-400 hover:bg-red-900 hover:text-white text-[10px] rounded transition"
+                              >
+                                ✕ Hapus
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ================= MODE 3: TABEL DETAIL ================= */}
+        {viewMode === "table" && (
+          <div className="bg-[#0d0d0d] border border-neutral-800 rounded-xl overflow-hidden shadow-2xl">
+            {loading ? (
+              <div className="p-8 text-center text-neutral-500 text-xs">
+                Memuat data...
+              </div>
+            ) : filteredApplications.length === 0 ? (
+              <div className="p-8 text-center text-neutral-500 text-xs">
+                Belum ada data lamaran.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-neutral-800 bg-neutral-950 text-neutral-400 uppercase font-bold text-[10px] tracking-wider">
+                      <th className="py-3 px-4">Perusahaan / Tugas</th>
+                      <th className="py-3 px-4">Posisi</th>
+                      <th className="py-3 px-4">Lokasi</th>
+                      <th className="py-3 px-4">Platform</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4 text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-800">
+                    {filteredApplications.map((app) => {
+                      const appId = app.id || app._id;
+                      const company = app.company_name || app.company || "-";
+                      const position = app.position || app.job_title || "-";
+                      const location = app.location || "-";
+                      const platform = app.source || app.platform || "-";
+                      return (
+                        <tr
+                          key={appId}
+                          onClick={() => navigate(`/applications/${appId}`)}
+                          className="hover:bg-neutral-900/40 transition cursor-pointer"
+                        >
+                          <td className="py-3.5 px-4 font-bold text-white">
+                            {company}
+                          </td>
+                          <td className="py-3.5 px-4 text-neutral-700">
+                            {position}
+                          </td>
+                          <td className="py-3.5 px-4 text-neutral-600">
+                            {location}
+                          </td>
+                          <td className="py-3.5 px-4 text-neutral-600">
+                            {platform}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span
+                              className={`inline-flex min-w-[92px] justify-center border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide ${statusBadgeStyles[app.status] || statusBadgeStyles.Applied}`}
+                            >
+                              {app.status || "Applied"}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(appId);
+                              }}
+                              className="text-red-500 hover:text-red-400 text-xs font-bold transition"
+                            >
+                              Hapus
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      {/* MODAL TAMBAH TUGAS */}
+      <CreateApplicationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={() => fetchApplications()}
+      />
+    </div>
+  );
+}

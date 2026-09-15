@@ -1,0 +1,134 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap");
+@import "tailwindcss";
+
+/* Tambahkan baris ini untuk mengaktifkan class .dark */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-mono: "Space Mono", "Courier New", monospace;
+}
+
+:root {
+  font-family: "Space Mono", "Courier New", monospace;
+  font-size: 14px;
+  color: #f5f5f5;
+  background: #000;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background: #000;
+  color: #f5f5f5;
+  font-family: inherit;
+}
+
+html.light body {
+  background: #fff;
+  color: #171717;
+}
+
+html.light [class~="bg-neutral-950"],
+html.light [class~="bg-neutral-900"] {
+  background-color: #fff !important;
+}
+
+html.light [class~="text-white"] {
+  color: #171717 !important;
+}
+
+html.light [class~="bg-black"][class~="text-white"],
+html.light button[class~="bg-black"][class~="text-white"] {
+  color: #fff !important;
+}
+
+html.light [class~="border-neutral-800"],
+html.light [class~="border-neutral-700"] {
+  border-color: #e5e5e5 !important;
+}
+
+html.light header {
+  background: #fff !important;
+  border-color: #e5e5e5 !important;
+}
+
+html.light .dashboard-light [class~="bg-black"],
+html.light .dashboard-light [class~="bg-neutral-950"],
+html.light .dashboard-light [class~="bg-neutral-900"],
+html.light .dashboard-light [class~="bg-neutral-800"],
+html.light .dashboard-light [class~="bg-[#0d0d0d]"],
+html.light .dashboard-light [class~="bg-[#121212]"] {
+  background-color: #fff !important;
+}
+
+html.light .dashboard-light [class~="text-white"] {
+  color: #171717 !important;
+}
+
+html.light .dashboard-light [class~="text-neutral-100"],
+html.light .dashboard-light [class~="text-neutral-200"],
+html.light .dashboard-light [class~="text-neutral-300"],
+html.light .dashboard-light [class~="text-neutral-400"] {
+  color: #525252 !important;
+}
+
+html.light .dashboard-light [class~="border-neutral-800"],
+html.light .dashboard-light [class~="border-neutral-700"] {
+  border-color: #e5e5e5 !important;
+}
+
+html.light .dashboard-light button[class~="bg-black"] {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+html.light button[class~="bg-black"] {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+select {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+::selection {
+  background: #fff;
+  color: #000;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080808;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3a3a3a;
+  border: 2px solid #080808;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
