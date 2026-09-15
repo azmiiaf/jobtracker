@@ -14,8 +14,8 @@ export default function CVManager() {
   useEffect(() => {
     const loadCvs = async () => {
       try {
-        const response = await getCvs();
-        setCvList(response.data || []);
+        const list = await getCvs();
+        setCvList(list || []);
       } catch (err) {
         setError(err.response?.data?.message || "Gagal memuat data CV.");
       } finally {

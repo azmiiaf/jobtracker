@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
 import CreateApplicationModal from "../components/ui/CreateApplicationModal";
@@ -57,6 +57,14 @@ const generateTimelineDates = () => {
   return dates;
 };
 
+const formatDate = (value) => {
+  if (!value) return "-";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? "-"
+    : date.toLocaleDateString("id-ID");
+};
+
 export default function Dashboard() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -72,7 +80,7 @@ export default function Dashboard() {
   const [statusFilter, setStatusFilter] = useState("");
 
   // 14 Hari Kolender Timeline
-  const timelineDates = generateTimelineDates();
+  const timelineDates = useMemo(() => generateTimelineDates(), []);
 
   const fetchApplications = async () => {
     setLoading(true);
@@ -91,8 +99,9 @@ export default function Dashboard() {
     }
   };
 
-  useEffect(() => {
-    fetchApplications();
+   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchApplications();
   }, []);
 
   const handleStatusChange = async (id, newStatus) => {
@@ -103,7 +112,7 @@ export default function Dashboard() {
           (app.id || app._id) === id ? { ...app, status: newStatus } : app,
         ),
       );
-    } catch (err) {
+    } catch {
       alert("Gagal memperbarui status.");
     }
   };
@@ -115,38 +124,38 @@ export default function Dashboard() {
       setApplications((prev) =>
         prev.filter((app) => (app.id || app._id) !== id),
       );
-    } catch (err) {
+    } catch {
       alert("Gagal menghapus data.");
     }
   };
 
-  const filteredApplications = applications.filter((app) => {
-    const company = (app.company_name || app.company || "").toLowerCase();
-    const position = (app.position || app.job_title || "").toLowerCase();
-    const search = searchTerm.toLowerCase();
+  const filteredApplications = useMemo(() => {
+    return applications.filter((app) => {
+      const company = (app.company_name || app.company || "").toLowerCase();
+      const position = (app.position || app.job_title || "").toLowerCase();
+      const search = searchTerm.toLowerCase();
 
-    const matchesSearch = company.includes(search) || position.includes(search);
-    const matchesStatus = statusFilter === "" || app.status === statusFilter;
+      const matchesSearch = company.includes(search) || position.includes(search);
+      const matchesStatus = statusFilter === "" || app.status === statusFilter;
 
-    return matchesSearch && matchesStatus;
-  });
+      return matchesSearch && matchesStatus;
+    });
+  }, [applications, searchTerm, statusFilter]);
 
   // Hitung Statistik Card Ringkasan
-  const totalStats = applications.length;
-  const appliedStats = applications.filter(
-    (a) => a.status === "Applied",
-  ).length;
-  const interviewStats = applications.filter(
-    (a) => a.status === "Interview",
-  ).length;
-  const offerStats = applications.filter((a) =>
-    ["Offering", "Offer", "Diterima"].includes(a.status),
-  ).length;
+  const { totalStats, appliedStats, interviewStats, offerStats } = useMemo(
+    () => ({
+      totalStats: filteredApplications.length,
+      appliedStats: filteredApplications.filter((a) => a.status === "Applied").length,
+      interviewStats: filteredApplications.filter((a) => a.status === "Interview").length,
+      offerStats: filteredApplications.filter((a) => ["Offering", "Offer", "Diterima"].includes(a.status)).length,
+    }),
+    [filteredApplications],
+  );
 
   // Hitung Posisi Gantt Grid Bar
   const getBarPosition = (appliedDateStr, status) => {
     let startIndex = 2;
-    let durationDays = 5;
 
     if (appliedDateStr) {
       const appDate = new Date(appliedDateStr).toISOString().split("T")[0];
@@ -156,6 +165,7 @@ export default function Dashboard() {
       }
     }
 
+    let durationDays;
     if (["Offering", "Offer", "Diterima"].includes(status)) {
       durationDays = 7;
     } else if (status === "Interview") {
@@ -507,8 +517,9 @@ export default function Dashboard() {
                       <th className="py-3 px-4">Perusahaan / Tugas</th>
                       <th className="py-3 px-4">Posisi</th>
                       <th className="py-3 px-4">Lokasi</th>
-                      <th className="py-3 px-4">Platform</th>
-                      <th className="py-3 px-4">Status</th>
+                       <th className="py-3 px-4">Platform</th>
+                       <th className="py-3 px-4">Tanggal Apply</th>
+                       <th className="py-3 px-4">Status</th>
                       <th className="py-3 px-4 text-right">Aksi</th>
                     </tr>
                   </thead>
@@ -519,6 +530,7 @@ export default function Dashboard() {
                       const position = app.position || app.job_title || "-";
                       const location = app.location || "-";
                       const platform = app.source || app.platform || "-";
+                      const appliedDate = formatDate(app.applied_date);
                       return (
                         <tr
                           key={appId}
@@ -534,10 +546,13 @@ export default function Dashboard() {
                           <td className="py-3.5 px-4 text-neutral-600">
                             {location}
                           </td>
-                          <td className="py-3.5 px-4 text-neutral-600">
-                            {platform}
-                          </td>
-                          <td className="py-3.5 px-4">
+                           <td className="py-3.5 px-4 text-neutral-600">
+                             {platform}
+                           </td>
+                           <td className="py-3.5 px-4 text-neutral-600">
+                             {appliedDate}
+                           </td>
+                           <td className="py-3.5 px-4">
                             <span
                               className={`inline-flex min-w-[92px] justify-center border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide ${statusBadgeStyles[app.status] || statusBadgeStyles.Applied}`}
                             >

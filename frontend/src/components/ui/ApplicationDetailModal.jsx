@@ -13,11 +13,6 @@ const formatDate = (value) => {
   return Number.isNaN(date.getTime()) ? "-" : date.toLocaleDateString("id-ID");
 };
 
-const getInterview = (application) => {
-  if (Array.isArray(application?.interviews)) return application.interviews[0];
-  return application?.interviews;
-};
-
 const getStatusHistory = (application) => {
   if (application?.status_history?.length) return application.status_history;
   if (!application?.status) return [];
@@ -136,12 +131,61 @@ export default function ApplicationDetailModal({
   useEffect(() => {
     if (!isOpen || !applicationId) return;
 
+    const cacheKey = `jt_application_detail_${applicationId}`;
+    const CACHE_TTL_MS = 120_000;
+
+    const readCache = () => {
+      try {
+        const raw = localStorage.getItem(cacheKey);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (Date.now() - parsed.timestamp > CACHE_TTL_MS) return null;
+        return parsed.data;
+      } catch {
+        return null;
+      }
+    };
+
+    const cached = readCache();
+    if (cached) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setData(cached);
+      setEditForm({
+        company_name: cached.company_name || "",
+        position: cached.position || "",
+        location: cached.location || "",
+        work_type: cached.work_type || "Full Time",
+        applied_date: cached.applied_date?.split("T")[0] || "",
+        source: cached.source || "Other",
+        cv_id: cached.cv_id || cached.cvs?.id || "",
+        job_url: cached.job_url || "",
+      });
+      setEditCustomSource(
+        cached.source && !builtInSources.includes(cached.source)
+          ? cached.source
+          : "",
+      );
+      setStatusValue(cached.status || "Applied");
+      setStatusDate(
+        cached.applied_date?.split("T")[0] || new Date().toISOString().split("T")[0],
+      );
+      return;
+    }
+
     const fetchDetail = async () => {
       try {
         setLoading(true);
         const res = await getApplicationById(applicationId);
         const detail = res.data?.data || res.data;
         setData(detail);
+        try {
+          localStorage.setItem(
+            cacheKey,
+            JSON.stringify({ data: detail, timestamp: Date.now() }),
+          );
+        } catch {
+          /* localStorage penuh — lewati */
+        }
         setEditForm({
           company_name: detail.company_name || "",
           position: detail.position || "",
@@ -203,7 +247,14 @@ export default function ApplicationDetailModal({
         );
       }
       const response = await getApplicationById(applicationId);
-      setData(response.data?.data || response.data);
+      const refreshed = response.data?.data || response.data;
+      setData(refreshed);
+      try {
+        localStorage.removeItem(`jt_application_detail_${applicationId}`);
+        localStorage.removeItem("jt_applications_cache");
+      } catch {
+        /* localStorage tidak tersedia — lewati */
+      }
       setIsEditing(false);
     } catch (error) {
       console.error("Gagal menyimpan data lamaran:", error);
@@ -237,6 +288,12 @@ export default function ApplicationDetailModal({
         status_history: [...(prev.status_history || []), nextHistory],
       }));
       setStatusNote("");
+      try {
+        localStorage.removeItem(`jt_application_detail_${applicationId}`);
+        localStorage.removeItem("jt_applications_cache");
+      } catch {
+        /* localStorage tidak tersedia — lewati */
+      }
       if (onRefresh) onRefresh();
     } catch (error) {
       console.error("Gagal memperbarui status:", error);
@@ -287,6 +344,9 @@ export default function ApplicationDetailModal({
             </h3>
             <p className="text-sm font-semibold text-neutral-500">
               {data?.company_name}
+            </p>
+            <p className="text-[10px] font-mono tracking-wider uppercase text-neutral-400 mt-0.5">
+              Applied: {formatDate(data?.applied_date)}
             </p>
           </div>
           <button
@@ -503,20 +563,12 @@ export default function ApplicationDetailModal({
                         <span className="font-bold">
                           {formatDate(data?.applied_date)}
                         </span>
-                      </div>
-                      <div className="p-3 bg-neutral-100 rounded border border-neutral-200">
-                        <span className="text-neutral-400 block mb-1">
-                          TANGGAL INTERVIEW
-                        </span>
-                        <span className="font-bold">
-                          {formatDate(getInterview(data)?.interview_date)}
-                        </span>
-                      </div>
-                      <div className="p-3 bg-neutral-100 rounded border border-neutral-200">
-                        <span className="text-neutral-400 block mb-1">
-                          SUMBER LAMARAN
-                        </span>
-                        <span className="font-bold">{data?.source || "-"}</span>
+                     </div>
+                     <div className="p-3 bg-neutral-100 rounded border border-neutral-200">
+                       <span className="text-neutral-400 block mb-1">
+                         SUMBER LAMARAN
+                       </span>
+                       <span className="font-bold">{data?.source || "-"}</span>
                       </div>
                       <div className="p-3 bg-neutral-100 rounded border border-neutral-200">
                         <span className="text-neutral-400 block mb-1">
