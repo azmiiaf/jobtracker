@@ -77,8 +77,3 @@ export const deleteApplication = async (id) => {
   clearApplicationsCache();
   return response.data;
 };
-
-export const getCvs = async () => {
-  const response = await api.get("/cvs");
-  return response.data;
-};

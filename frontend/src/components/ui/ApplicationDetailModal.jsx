@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import DetailSkeleton from "./DetailSkeleton";
 import {
   getApplicationById,
-  getCvs,
   updateApplication,
   updateApplicationStatus,
   deleteApplication,
@@ -116,7 +115,6 @@ export default function ApplicationDetailModal({
   const [isEditing, setIsEditing] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState("");
-  const [cvOptions, setCvOptions] = useState([]);
   const [customSources, setCustomSources] = useState(getCustomSources);
   const [editCustomSource, setEditCustomSource] = useState("");
   const [editForm, setEditForm] = useState({});
@@ -158,7 +156,6 @@ export default function ApplicationDetailModal({
         work_type: cached.work_type || "Full Time",
         applied_date: cached.applied_date?.split("T")[0] || "",
         source: cached.source || "Other",
-        cv_id: cached.cv_id || cached.cvs?.id || "",
         job_url: cached.job_url || "",
       });
       setEditCustomSource(
@@ -194,7 +191,6 @@ export default function ApplicationDetailModal({
           work_type: detail.work_type || "Full Time",
           applied_date: detail.applied_date?.split("T")[0] || "",
           source: detail.source || "Other",
-          cv_id: detail.cv_id || detail.cvs?.id || "",
           job_url: detail.job_url || "",
         });
         setEditCustomSource(
@@ -215,11 +211,6 @@ export default function ApplicationDetailModal({
     };
 
     fetchDetail();
-    getCvs()
-      .then((response) =>
-        setCvOptions(Array.isArray(response.data) ? response.data : []),
-      )
-      .catch(() => setCvOptions([]));
   }, [isOpen, applicationId, application]);
 
   const handleEditChange = (event) => {
@@ -359,9 +350,7 @@ export default function ApplicationDetailModal({
         </div>
 
         {loading ? (
-
           <DetailSkeleton page={page} />
-
         ) : (
           <>
             <div
@@ -492,24 +481,6 @@ export default function ApplicationDetailModal({
                       </label>
                       <label className="space-y-1">
                         <span className="block text-neutral-500">
-                          CV YANG DIPAKAI
-                        </span>
-                        <select
-                          name="cv_id"
-                          value={editForm.cv_id || ""}
-                          onChange={handleEditChange}
-                          className="w-full border border-neutral-400 bg-white px-3 py-2 text-neutral-900 outline-none focus:border-black"
-                        >
-                          <option value="">Tidak dipilih</option>
-                          {cvOptions.map((cv) => (
-                            <option key={cv.id} value={cv.id}>
-                              {cv.name}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <label className="space-y-1">
-                        <span className="block text-neutral-500">
                           LINK POSTINGAN
                         </span>
                         <input
@@ -564,20 +535,12 @@ export default function ApplicationDetailModal({
                         <span className="font-bold">
                           {formatDate(data?.applied_date)}
                         </span>
-                     </div>
-                     <div className="p-3 bg-neutral-100 rounded border border-neutral-200">
-                       <span className="text-neutral-400 block mb-1">
-                         SUMBER LAMARAN
-                       </span>
-                       <span className="font-bold">{data?.source || "-"}</span>
                       </div>
                       <div className="p-3 bg-neutral-100 rounded border border-neutral-200">
                         <span className="text-neutral-400 block mb-1">
-                          CV YANG DIPAKAI
+                          SUMBER LAMARAN
                         </span>
-                        <span className="font-bold">
-                          {data?.cvs?.name || "-"}
-                        </span>
+                        <span className="font-bold">{data?.source || "-"}</span>
                       </div>
                     </div>
 

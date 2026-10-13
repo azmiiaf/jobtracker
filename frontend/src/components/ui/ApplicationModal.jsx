@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
-import { createApplication, getCvs } from '../../services/applicationService';
+import { useState } from 'react';
+import { createApplication } from '../../services/applicationService';
 
 export default function ApplicationModal({ isOpen, onClose, onSuccess }) {
-  const [cvList, setCvList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -16,28 +15,8 @@ export default function ApplicationModal({ isOpen, onClose, onSuccess }) {
     applied_date: new Date().toISOString().split('T')[0],
     status: 'Applied',
     job_url: '',
-    cv_id: '',
     notes: '',
   });
-
-  useEffect(() => {
-    if (isOpen) {
-      fetchCVs();
-    }
-  }, [isOpen]);
-
-  const fetchCVs = async () => {
-    try {
-      const res = await getCvs();
-      const data = res.data?.data || res.data || [];
-      setCvList(data);
-      if (data.length > 0 && !formData.cv_id) {
-        setFormData((prev) => ({ ...prev, cv_id: data[0].id }));
-      }
-    } catch (err) {
-      console.error('Gagal memuat CV:', err);
-    }
-  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -162,35 +141,15 @@ export default function ApplicationModal({ isOpen, onClose, onSuccess }) {
             </div>
           </div>
 
-          {/* Grid Tanggal & CV */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1">Tanggal Melamar</label>
-              <input
-                type="date"
-                name="applied_date"
-                value={formData.applied_date}
-                onChange={handleChange}
-                className="w-full px-3 py-1.5 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1">Pilih CV</label>
-              <select
-                name="cv_id"
-                value={formData.cv_id}
-                onChange={handleChange}
-                className="w-full px-3 py-1.5 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-              >
-                {cvList.length === 0 && <option value="">Tidak ada CV terdaftar</option>}
-                {cvList.map((cv) => (
-                  <option key={cv.id} value={cv.id}>
-                    {cv.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">Tanggal Melamar</label>
+            <input
+              type="date"
+              name="applied_date"
+              value={formData.applied_date}
+              onChange={handleChange}
+              className="w-full px-3 py-1.5 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+            />
           </div>
 
           <div>

@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useEffect } from "react";
-import { createApplication, getCvs } from "../../services/applicationService";
+import { createApplication } from "../../services/applicationService";
 
 const builtInSources = [
   "LinkedIn",
@@ -31,21 +30,12 @@ export default function CreateApplicationModal({ isOpen, onClose, onSuccess }) {
     source: "LinkedIn",
     job_url: "",
     applied_date: new Date().toISOString().split("T")[0],
-    cv_id: "",
   });
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [cvList, setCvList] = useState([]);
   const [customSources, setCustomSources] = useState(getCustomSources);
   const [customSource, setCustomSource] = useState("");
-
-  useEffect(() => {
-    if (!isOpen) return;
-    getCvs()
-      .then((response) => setCvList(response.data || []))
-      .catch(() => setCvList([]));
-  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -77,7 +67,6 @@ export default function CreateApplicationModal({ isOpen, onClose, onSuccess }) {
       source,
       status: "Applied",
       applied_date: formData.applied_date,
-      cv_id: formData.cv_id || null,
     };
 
     try {
@@ -100,7 +89,6 @@ export default function CreateApplicationModal({ isOpen, onClose, onSuccess }) {
         source: "LinkedIn",
         job_url: "",
         applied_date: new Date().toISOString().split("T")[0],
-        cv_id: "",
       });
       setCustomSource("");
     } catch (err) {
@@ -252,38 +240,18 @@ export default function CreateApplicationModal({ isOpen, onClose, onSuccess }) {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block mb-1 text-neutral-400 font-bold uppercase">
-                Tanggal Apply *
-              </label>
-              <input
-                type="date"
-                name="applied_date"
-                required
-                value={formData.applied_date}
-                onChange={handleChange}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-white focus:outline-none focus:border-neutral-500"
-              />
-            </div>
-            <div>
-              <label className="block mb-1 text-neutral-400 font-bold uppercase">
-                CV yang Dipakai
-              </label>
-              <select
-                name="cv_id"
-                value={formData.cv_id}
-                onChange={handleChange}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-white focus:outline-none focus:border-neutral-500"
-              >
-                <option value="">Tidak dipilih</option>
-                {cvList.map((cv) => (
-                  <option key={cv.id} value={cv.id}>
-                    {cv.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <label className="block mb-1 text-neutral-400 font-bold uppercase">
+              Tanggal Apply *
+            </label>
+            <input
+              type="date"
+              name="applied_date"
+              required
+              value={formData.applied_date}
+              onChange={handleChange}
+              className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-white focus:outline-none focus:border-neutral-500"
+            />
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-neutral-800">

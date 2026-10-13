@@ -41,8 +41,6 @@ export default function DetailSkeleton({ page = false }) {
                 "TIPE KERJA",
                 "SUMBER / PLATFORM",
                 "TANGGAL MELAMAR",
-                "VERSI CV",
-                "TAUTAN LOWONGAN",
               ].map((label, idx) => (
                 <div key={idx} className="space-y-1.5">
                   <span className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider">

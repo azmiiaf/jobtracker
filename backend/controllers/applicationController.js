@@ -12,7 +12,6 @@ const applicationFields = [
   "source",
   "applied_date",
   "status",
-  "cv_id",
   "notes",
 ];
 const pickApplicationFields = (body) => {
@@ -45,7 +44,7 @@ const getApplications = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from("applications")
-      .select("*, cvs(id, name), interviews(interview_date, interview_time)")
+      .select("*, interviews(interview_date, interview_time)")
       .eq("user_id", req.user.id)
       .order("applied_date", { ascending: false });
 
@@ -63,7 +62,7 @@ const getApplicationById = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from("applications")
-      .select("*, cvs(id, name)")
+      .select("*")
       .eq("id", req.params.id)
       .eq("user_id", req.user.id)
       .maybeSingle();
@@ -117,7 +116,7 @@ const createApplication = async (req, res) => {
           status: normalizeStatus(payload.status || "Applied"),
         },
       ])
-      .select("*, cvs(id, name), interviews(interview_date, interview_time)")
+      .select("*, interviews(interview_date, interview_time)")
       .single();
 
     if (error) throw error;

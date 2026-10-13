@@ -34,7 +34,7 @@ const getDashboardStats = async (req, res) => {
     // 3. 5 Lamaran Terbaru
     const { data: recentApplications, error: recentError } = await supabase
       .from('applications')
-      .select('*, cvs(id, name)')
+      .select('*')
       .eq('user_id', userId)
       .order('applied_date', { ascending: false })
       .limit(5)
