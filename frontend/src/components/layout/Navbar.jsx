@@ -12,12 +12,12 @@ export default function Navbar() {
   const userName = user?.name || user?.email || user?.username || "Online";
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-neutral-200 bg-white px-6 py-4 font-mono text-xs shadow-sm">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-neutral-200 bg-white px-6 py-4 text-xs shadow-sm">
       <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-6">
         <div className="flex min-w-0 items-center gap-6">
           <NavLink
             to="/"
-            className="shrink-0 text-sm font-bold tracking-widest text-neutral-900"
+            className="shrink-0 text-sm font-bold font-mono tracking-widest text-neutral-900"
           >
             JOBTRACKER
           </NavLink>

@@ -107,9 +107,9 @@ export default function CreateApplicationModal({ isOpen, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-xl p-6 font-mono text-white shadow-2xl relative">
+      <div className="w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-xl p-6 text-white shadow-2xl relative">
         <div className="flex justify-between items-center pb-4 mb-4 border-b border-neutral-800">
-          <h3 className="text-sm font-bold tracking-wider text-white">
+          <h3 className="text-sm font-bold font-mono tracking-wider text-white">
             + TAMBAH LAMARAN BARU
           </h3>
           <button

@@ -30,7 +30,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4 font-mono text-white">
+    <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4 text-white">
       <div className="w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-xl p-6 shadow-2xl">
         <h2 className="text-xl font-bold mb-4 text-center tracking-wider">MASUK KE AKUN</h2>
 

@@ -8,7 +8,7 @@ export default function TableView({ applications = [], onSelectApp }) {
 
   return (
     <div className="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm">
-      <table className="w-full text-left font-mono text-xs border-collapse">
+      <table className="w-full text-left text-xs border-collapse">
         <thead>
           <tr className="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/70 dark:bg-neutral-900/60 text-neutral-500 uppercase tracking-wider">
             <th className="py-3 px-4">Perusahaan</th>
@@ -40,7 +40,7 @@ export default function TableView({ applications = [], onSelectApp }) {
                   {app.work_type || 'Full Time'}
                 </td>
                 <td className="py-3.5 px-4">
-                  <span className={`inline-block px-2 py-0.5 border rounded uppercase text-[10px] ${statusStyles[app.status] || statusStyles.Applied}`}>
+                  <span className={`inline-block px-2 py-0.5 font-mono border rounded uppercase text-[10px] ${statusStyles[app.status] || statusStyles.Applied}`}>
                     {app.status}
                   </span>
                 </td>

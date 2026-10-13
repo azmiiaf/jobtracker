@@ -198,7 +198,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="dashboard-light min-h-screen bg-neutral-50 text-neutral-900 font-mono select-none">
+    <div className="dashboard-light min-h-screen bg-neutral-50 text-neutral-900 select-none">
       <Navbar />
 
       <main className="max-w-[1600px] mx-auto p-6 pt-24 space-y-6 min-h-[calc(100vh-72px)]">
@@ -211,19 +211,19 @@ export default function Dashboard() {
               <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
                 TOTAL TUGAS / LAMARAN
               </p>
-              <p className="text-2xl font-bold text-white">{totalStats}</p>
+              <p className="text-2xl font-bold font-mono text-white">{totalStats}</p>
             </div>
             <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
               <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
                 IN PROGRESS (APPLIED)
               </p>
-              <p className="text-2xl font-bold text-blue-400">{appliedStats}</p>
+              <p className="text-2xl font-bold font-mono text-blue-400">{appliedStats}</p>
             </div>
             <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
               <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
                 TAHAP INTERVIEW
               </p>
-              <p className="text-2xl font-bold text-yellow-400">
+              <p className="text-2xl font-bold font-mono text-yellow-400">
                 {interviewStats}
               </p>
             </div>
@@ -231,13 +231,13 @@ export default function Dashboard() {
               <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
                 SELESAI (OFFER)
               </p>
-              <p className="text-2xl font-bold text-emerald-400">{offerStats}</p>
+              <p className="text-2xl font-bold font-mono text-emerald-400">{offerStats}</p>
             </div>
             <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
               <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
                 DITOLAK
               </p>
-              <p className="text-2xl font-bold text-red-400">{rejectedStats}</p>
+              <p className="text-2xl font-bold font-mono text-red-400">{rejectedStats}</p>
             </div>
           </div>
         )}
@@ -574,12 +574,12 @@ export default function Dashboard() {
                            <td className="py-3.5 px-4 text-neutral-600">
                              {platform}
                            </td>
-                           <td className="py-3.5 px-4 text-neutral-600">
+                           <td className="py-3.5 px-4 text-neutral-600 font-mono text-[11px]">
                              {appliedDate}
                            </td>
                            <td className="py-3.5 px-4">
                             <span
-                              className={`inline-flex min-w-[92px] justify-center border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide ${statusBadgeStyles[app.status] || statusBadgeStyles.Applied}`}
+                              className={`inline-flex min-w-[92px] justify-center border px-2.5 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wide ${statusBadgeStyles[app.status] || statusBadgeStyles.Applied}`}
                             >
                               {app.status || "Applied"}
                             </span>

@@ -331,7 +331,7 @@ export default function ApplicationDetailModal({
             <span className="text-[10px] font-mono tracking-widest uppercase text-neutral-400">
               DETAIL LAMARAN
             </span>
-            <h3 className="text-xl font-bold font-mono uppercase">
+            <h3 className="text-xl font-bold uppercase">
               {data?.position || "Loading..."}
             </h3>
             <p className="text-sm font-semibold text-neutral-500">
@@ -364,7 +364,7 @@ export default function ApplicationDetailModal({
                 {isEditing ? (
                   <form
                     onSubmit={handleEditSave}
-                    className="space-y-4 border border-neutral-200 bg-neutral-50 p-4 text-xs font-mono"
+                    className="space-y-4 border border-neutral-200 bg-neutral-50 p-4 text-xs"
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-bold uppercase text-neutral-700">
@@ -511,9 +511,9 @@ export default function ApplicationDetailModal({
                       </button>
                     </div>
                     {/* Info Metadata */}
-                    <div className="grid grid-cols-2 gap-4 text-xs font-mono">
+                    <div className="grid grid-cols-2 gap-4 text-xs">
                       <div className="p-3 bg-neutral-100 rounded border border-neutral-200">
-                        <span className="text-neutral-400 block mb-1">
+                        <span className="text-neutral-400 font-mono text-[10px] block mb-1">
                           LOKASI
                         </span>
                         <span className="font-bold">
@@ -521,7 +521,7 @@ export default function ApplicationDetailModal({
                         </span>
                       </div>
                       <div className="p-3 bg-neutral-100 rounded border border-neutral-200">
-                        <span className="text-neutral-400 block mb-1">
+                        <span className="text-neutral-400 font-mono text-[10px] block mb-1">
                           TIPE KERJA
                         </span>
                         <span className="font-bold">
@@ -529,15 +529,15 @@ export default function ApplicationDetailModal({
                         </span>
                       </div>
                       <div className="p-3 bg-neutral-100 rounded border border-neutral-200">
-                        <span className="text-neutral-400 block mb-1">
+                        <span className="text-neutral-400 font-mono text-[10px] block mb-1">
                           TANGGAL APPLY
                         </span>
-                        <span className="font-bold">
+                        <span className="font-bold font-mono">
                           {formatDate(data?.applied_date)}
                         </span>
                       </div>
                       <div className="p-3 bg-neutral-100 rounded border border-neutral-200">
-                        <span className="text-neutral-400 block mb-1">
+                        <span className="text-neutral-400 font-mono text-[10px] block mb-1">
                           SUMBER LAMARAN
                         </span>
                         <span className="font-bold">{data?.source || "-"}</span>
