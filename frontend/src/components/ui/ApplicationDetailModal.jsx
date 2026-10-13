@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import DetailSkeleton from "./DetailSkeleton";
 import {
   getApplicationById,
   getCvs,
@@ -358,9 +359,9 @@ export default function ApplicationDetailModal({
         </div>
 
         {loading ? (
-          <div className="py-12 text-center font-mono text-xs text-neutral-400">
-            MEMUAT DATA...
-          </div>
+
+          <DetailSkeleton page={page} />
+
         ) : (
           <>
             <div

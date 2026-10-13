@@ -20,12 +20,27 @@ const protect = (req, res, next) => {
       return next()
     } catch (error) {
       console.error('Auth middleware error:', error.message)
-      return res.status(401).json({ success: false, message: 'Token tidak valid' })
+      if (error.name === 'TokenExpiredError') {
+        return res.status(401).json({
+          success: false,
+          code: 'TOKEN_EXPIRED',
+          message: 'Sesi login telah berakhir, silakan login kembali.',
+        })
+      }
+      return res.status(401).json({
+        success: false,
+        code: 'TOKEN_INVALID',
+        message: 'Token tidak valid, silakan login kembali.',
+      })
     }
   }
 
   if (!token) {
-    return res.status(401).json({ success: false, message: 'Token Tidak Ditemukan!' })
+    return res.status(401).json({
+      success: false,
+      code: 'TOKEN_MISSING',
+      message: 'Token tidak ditemukan, silakan login terlebih dahulu.',
+    })
   }
 }
 

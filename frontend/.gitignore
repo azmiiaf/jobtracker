@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 .env
 .env.example
+.agents
+.claude
+.codex
+.gemini
+.opencode

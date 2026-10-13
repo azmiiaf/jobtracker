@@ -28,18 +28,6 @@ export default function Navbar() {
               {userName}
             </strong>
           </div>
-          <NavLink
-            to="/cvs"
-            className={({ isActive }) =>
-              `border px-3 py-2 font-bold uppercase tracking-wide transition ${
-                isActive
-                  ? "border-black bg-white text-black"
-                  : "border-neutral-300 bg-white text-neutral-700 hover:border-black hover:bg-neutral-100 hover:text-black"
-              }`
-            }
-          >
-            CV MANAGER
-          </NavLink>
         </div>
 
         <button

@@ -3,6 +3,12 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
 import CreateApplicationModal from "../components/ui/CreateApplicationModal";
 import {
+  StatsSkeleton,
+  TableSkeleton,
+  BoardSkeleton,
+  GanttSkeleton,
+} from "../components/ui/DashboardSkeleton";
+import {
   getApplications,
   deleteApplication,
   updateApplication,
@@ -196,41 +202,45 @@ export default function Dashboard() {
       <Navbar />
 
       <main className="max-w-[1600px] mx-auto p-6 pt-24 space-y-6 min-h-[calc(100vh-72px)]">
-        {/* ================= CARD RINGKASAN STATISTIK (DIBALIKIN) ================= */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-xs">
-          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
-            <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
-              TOTAL TUGAS / LAMARAN
-            </p>
-            <p className="text-2xl font-bold text-white">{totalStats}</p>
+        {/* ================= CARD RINGKASAN STATISTIK ================= */}
+        {loading ? (
+          <StatsSkeleton />
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-xs">
+            <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
+              <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
+                TOTAL TUGAS / LAMARAN
+              </p>
+              <p className="text-2xl font-bold text-white">{totalStats}</p>
+            </div>
+            <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
+              <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
+                IN PROGRESS (APPLIED)
+              </p>
+              <p className="text-2xl font-bold text-blue-400">{appliedStats}</p>
+            </div>
+            <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
+              <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
+                TAHAP INTERVIEW
+              </p>
+              <p className="text-2xl font-bold text-yellow-400">
+                {interviewStats}
+              </p>
+            </div>
+            <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
+              <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
+                SELESAI (OFFER)
+              </p>
+              <p className="text-2xl font-bold text-emerald-400">{offerStats}</p>
+            </div>
+            <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
+              <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
+                DITOLAK
+              </p>
+              <p className="text-2xl font-bold text-red-400">{rejectedStats}</p>
+            </div>
           </div>
-          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
-            <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
-              IN PROGRESS (APPLIED)
-            </p>
-            <p className="text-2xl font-bold text-blue-400">{appliedStats}</p>
-          </div>
-          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
-            <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
-              TAHAP INTERVIEW
-            </p>
-            <p className="text-2xl font-bold text-yellow-400">
-              {interviewStats}
-            </p>
-          </div>
-          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
-            <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
-              SELESAI (OFFER)
-            </p>
-            <p className="text-2xl font-bold text-emerald-400">{offerStats}</p>
-          </div>
-          <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
-            <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
-              DITOLAK
-            </p>
-            <p className="text-2xl font-bold text-red-400">{rejectedStats}</p>
-          </div>
-        </div>
+        )}
 
         {/* TOOLBAR PENCARIAN, FILTER, SWITCHER & BTN TAMBAH */}
         <div className="flex flex-col md:flex-row gap-3 justify-between items-center">
@@ -307,8 +317,11 @@ export default function Dashboard() {
         )}
 
         {/* ================= MODE 1: GANTT CHART (GRID TIMELINE PROYEK) ================= */}
-        {viewMode === "gantt" && (
-          <div className="bg-[#0d0d0d] border border-neutral-800 rounded-2xl p-6 shadow-2xl space-y-6 overflow-hidden">
+        {viewMode === "gantt" &&
+          (loading ? (
+            <GanttSkeleton />
+          ) : (
+            <div className="bg-[#0d0d0d] border border-neutral-800 rounded-2xl p-6 shadow-2xl space-y-6 overflow-hidden">
             {/* Header + Legend persis screenshot */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
@@ -332,11 +345,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {loading ? (
-              <div className="py-16 text-center text-neutral-500 text-xs">
-                Memuat timeline proyek...
-              </div>
-            ) : filteredApplications.length === 0 ? (
+            {filteredApplications.length === 0 ? (
               <div className="py-16 text-center text-neutral-500 text-xs">
                 Belum ada data tugas.
               </div>
@@ -431,11 +440,14 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-        )}
+        ))}
 
         {/* ================= MODE 2: KANBAN BOARD ================= */}
-        {viewMode === "board" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+        {viewMode === "board" &&
+          (loading ? (
+            <BoardSkeleton />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
             {["Applied", "Interview", "Offer", "Rejected"].map((colKey) => {
               const itemsInCol = filteredApplications.filter((app) => {
                 if (colKey === "Offering")
@@ -511,21 +523,19 @@ export default function Dashboard() {
               );
             })}
           </div>
-        )}
+        ))}
 
         {/* ================= MODE 3: TABEL DETAIL ================= */}
-        {viewMode === "table" && (
-          <div className="bg-[#0d0d0d] border border-neutral-800 rounded-xl overflow-hidden shadow-2xl">
-            {loading ? (
-              <div className="p-8 text-center text-neutral-500 text-xs">
-                Memuat data...
-              </div>
-            ) : filteredApplications.length === 0 ? (
-              <div className="p-8 text-center text-neutral-500 text-xs">
-                Belum ada data lamaran.
-              </div>
-            ) : (
-             <div className="overflow-x-auto sm:overflow-x-visible">
+        {viewMode === "table" &&
+          (loading ? (
+            <TableSkeleton />
+          ) : filteredApplications.length === 0 ? (
+            <div className="bg-[#0d0d0d] border border-neutral-800 rounded-xl overflow-hidden shadow-2xl p-8 text-center text-neutral-500 text-xs">
+              Belum ada data lamaran.
+            </div>
+          ) : (
+            <div className="bg-[#0d0d0d] border border-neutral-800 rounded-xl overflow-hidden shadow-2xl">
+              <div className="overflow-x-auto sm:overflow-x-visible">
                 <table className="w-full text-left border-collapse text-xs min-w-[720px]">
                   <thead>
                     <tr className="sticky top-0 z-20 border-b border-neutral-800 bg-neutral-950 text-neutral-400 uppercase font-bold text-[10px] tracking-wider shadow-md">
@@ -591,9 +601,8 @@ export default function Dashboard() {
                   </tbody>
                 </table>
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          ))}
       </main>
 
       {/* MODAL TAMBAH TUGAS */}

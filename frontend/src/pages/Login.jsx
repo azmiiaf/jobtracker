@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { login } from '../services/authService';
 
 export default function Login() {
@@ -7,6 +7,8 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+  const isSessionExpired = searchParams.get('expired') === 'true';
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -31,6 +33,15 @@ export default function Login() {
     <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4 font-mono text-white">
       <div className="w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-xl p-6 shadow-2xl">
         <h2 className="text-xl font-bold mb-4 text-center tracking-wider">MASUK KE AKUN</h2>
+
+        {isSessionExpired && !error && (
+          <div
+            role="status"
+            className="mb-4 p-3 bg-amber-950/70 border border-amber-800 text-amber-300 text-xs rounded break-words"
+          >
+            Sesi login Anda telah berakhir. Silakan login kembali untuk melanjutkan.
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-3 bg-red-950/80 border border-red-800 text-red-400 text-xs rounded break-words">
