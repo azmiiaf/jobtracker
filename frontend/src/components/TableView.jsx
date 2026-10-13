@@ -40,7 +40,7 @@ export default function TableView({ applications = [], onSelectApp }) {
                   {app.work_type || 'Full Time'}
                 </td>
                 <td className="py-3.5 px-4">
-                  <span className={`inline-block px-2 py-0.5 font-mono border rounded uppercase text-[10px] ${statusStyles[app.status] || statusStyles.Applied}`}>
+                  <span className={`inline-block px-2 py-0.5 border rounded uppercase text-[10px] font-semibold ${statusStyles[app.status] || statusStyles.Applied}`}>
                     {app.status}
                   </span>
                 </td>

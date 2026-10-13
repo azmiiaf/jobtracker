@@ -574,12 +574,12 @@ export default function Dashboard() {
                            <td className="py-3.5 px-4 text-neutral-600">
                              {platform}
                            </td>
-                           <td className="py-3.5 px-4 text-neutral-600 font-mono text-[11px]">
+                           <td className="py-3.5 px-4 text-neutral-600">
                              {appliedDate}
                            </td>
                            <td className="py-3.5 px-4">
                             <span
-                              className={`inline-flex min-w-[92px] justify-center border px-2.5 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wide ${statusBadgeStyles[app.status] || statusBadgeStyles.Applied}`}
+                              className={`inline-flex min-w-[92px] justify-center border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide ${statusBadgeStyles[app.status] || statusBadgeStyles.Applied}`}
                             >
                               {app.status || "Applied"}
                             </span>
