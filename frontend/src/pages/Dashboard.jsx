@@ -198,52 +198,54 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="dashboard-light min-h-screen bg-neutral-50 text-neutral-900 select-none">
+    <div className="dashboard-light h-screen max-h-screen flex flex-col bg-neutral-50 text-neutral-900 select-none overflow-hidden">
       <Navbar />
 
-      <main className="max-w-[1600px] mx-auto p-6 pt-24 space-y-6 min-h-[calc(100vh-72px)]">
+      <main className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 pt-20 pb-4 flex-1 flex flex-col min-h-0 gap-4 overflow-hidden">
         {/* ================= CARD RINGKASAN STATISTIK ================= */}
-        {loading ? (
-          <StatsSkeleton />
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-xs">
-            <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
-              <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
-                TOTAL TUGAS / LAMARAN
-              </p>
-              <p className="text-2xl font-bold font-mono text-white">{totalStats}</p>
+        <div className="shrink-0">
+          {loading ? (
+            <StatsSkeleton />
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-xs">
+              <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
+                <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
+                  TOTAL TUGAS / LAMARAN
+                </p>
+                <p className="text-2xl font-bold font-mono text-white">{totalStats}</p>
+              </div>
+              <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
+                <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
+                  IN PROGRESS (APPLIED)
+                </p>
+                <p className="text-2xl font-bold font-mono text-blue-400">{appliedStats}</p>
+              </div>
+              <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
+                <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
+                  TAHAP INTERVIEW
+                </p>
+                <p className="text-2xl font-bold font-mono text-yellow-400">
+                  {interviewStats}
+                </p>
+              </div>
+              <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
+                <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
+                  SELESAI (OFFER)
+                </p>
+                <p className="text-2xl font-bold font-mono text-emerald-400">{offerStats}</p>
+              </div>
+              <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
+                <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
+                  DITOLAK
+                </p>
+                <p className="text-2xl font-bold font-mono text-red-400">{rejectedStats}</p>
+              </div>
             </div>
-            <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
-              <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
-                IN PROGRESS (APPLIED)
-              </p>
-              <p className="text-2xl font-bold font-mono text-blue-400">{appliedStats}</p>
-            </div>
-            <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
-              <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
-                TAHAP INTERVIEW
-              </p>
-              <p className="text-2xl font-bold font-mono text-yellow-400">
-                {interviewStats}
-              </p>
-            </div>
-            <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
-              <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
-                SELESAI (OFFER)
-              </p>
-              <p className="text-2xl font-bold font-mono text-emerald-400">{offerStats}</p>
-            </div>
-            <div className="bg-[#0d0d0d] border border-neutral-800 p-4 rounded-xl shadow-lg text-center">
-              <p className="text-neutral-500 uppercase font-bold text-[10px] tracking-wider mb-1">
-                DITOLAK
-              </p>
-              <p className="text-2xl font-bold font-mono text-red-400">{rejectedStats}</p>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* TOOLBAR PENCARIAN, FILTER, SWITCHER & BTN TAMBAH */}
-        <div className="flex flex-col md:flex-row gap-3 justify-between items-center">
+        <div className="shrink-0 flex flex-col md:flex-row gap-3 justify-between items-center">
           <div className="flex flex-wrap sm:flex-nowrap gap-3 w-full md:w-auto flex-1">
             <input
               type="text"
@@ -319,11 +321,13 @@ export default function Dashboard() {
         {/* ================= MODE 1: GANTT CHART (GRID TIMELINE PROYEK) ================= */}
         {viewMode === "gantt" &&
           (loading ? (
-            <GanttSkeleton />
+            <div className="flex-1 min-h-0">
+              <GanttSkeleton />
+            </div>
           ) : (
-            <div className="bg-[#0d0d0d] border border-neutral-800 rounded-2xl p-6 shadow-2xl space-y-6 overflow-hidden">
+            <div className="bg-[#0d0d0d] border border-neutral-800 rounded-2xl p-6 shadow-2xl space-y-4 overflow-hidden flex-1 min-h-0 flex flex-col">
             {/* Header + Legend persis screenshot */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
               <div>
                 <h1 className="text-xl font-bold text-white tracking-tight">
                   Timeline Proyek
@@ -346,11 +350,11 @@ export default function Dashboard() {
             </div>
 
             {filteredApplications.length === 0 ? (
-              <div className="py-16 text-center text-neutral-500 text-xs">
+              <div className="py-16 text-center text-neutral-500 text-xs flex-1 flex items-center justify-center">
                 Belum ada data tugas.
               </div>
             ) : (
-              <div className="overflow-x-auto border border-neutral-800 rounded-xl bg-neutral-950">
+              <div className="overflow-x-auto overflow-y-auto border border-neutral-800 rounded-xl bg-neutral-950 flex-1 min-h-0">
                 <div className="min-w-[1200px]">
                   {/* Grid Header Tanggal */}
                   <div className="grid grid-cols-[220px_repeat(14,minmax(80px,1fr))] border-b border-neutral-800 bg-[#121212]">
@@ -445,9 +449,11 @@ export default function Dashboard() {
         {/* ================= MODE 2: KANBAN BOARD ================= */}
         {viewMode === "board" &&
           (loading ? (
-            <BoardSkeleton />
+            <div className="flex-1 min-h-0">
+              <BoardSkeleton />
+            </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+            <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
             {["Applied", "Interview", "Offer", "Rejected"].map((colKey) => {
               const itemsInCol = filteredApplications.filter((app) => {
                 if (colKey === "Offering")
@@ -460,7 +466,7 @@ export default function Dashboard() {
               return (
                 <div
                   key={colKey}
-                  className="bg-[#0d0d0d] border border-neutral-800 rounded-xl p-4 flex flex-col min-h-[450px]"
+                  className="bg-[#0d0d0d] border border-neutral-800 rounded-xl p-4 flex flex-col h-full max-h-full min-h-0"
                 >
                   <div className="flex justify-between items-center pb-3 mb-3 border-b border-neutral-800">
                     <h3 className="font-bold text-xs tracking-wider text-white uppercase">
@@ -528,24 +534,26 @@ export default function Dashboard() {
         {/* ================= MODE 3: TABEL DETAIL ================= */}
         {viewMode === "table" &&
           (loading ? (
-            <TableSkeleton />
+            <div className="flex-1 min-h-0">
+              <TableSkeleton />
+            </div>
           ) : filteredApplications.length === 0 ? (
-            <div className="bg-[#0d0d0d] border border-neutral-800 rounded-xl overflow-hidden shadow-2xl p-8 text-center text-neutral-500 text-xs">
+            <div className="flex-1 min-h-0 bg-[#0d0d0d] border border-neutral-800 rounded-xl overflow-hidden shadow-2xl p-8 flex items-center justify-center text-center text-neutral-500 text-xs">
               Belum ada data lamaran.
             </div>
           ) : (
-            <div className="bg-[#0d0d0d] border border-neutral-800 rounded-xl overflow-hidden shadow-2xl">
-              <div className="overflow-x-auto sm:overflow-x-visible">
+            <div className="flex-1 min-h-0 flex flex-col bg-[#0d0d0d] border border-neutral-800 rounded-xl overflow-hidden shadow-2xl">
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs min-w-[720px]">
-                  <thead>
-                    <tr className="sticky top-0 z-20 border-b border-neutral-800 bg-neutral-950 text-neutral-400 uppercase font-bold text-[10px] tracking-wider shadow-md">
-                      <th className="py-3 px-4">Perusahaan / Tugas</th>
-                      <th className="py-3 px-4">Posisi</th>
-                      <th className="py-3 px-4">Lokasi</th>
-                      <th className="py-3 px-4">Platform</th>
-                      <th className="py-3 px-4">Tanggal Apply</th>
-                      <th className="py-3 px-4">Status</th>
-                      <th className="py-3 px-4 text-right">Aksi</th>
+                  <thead className="sticky top-0 z-20 border-b border-neutral-800 bg-neutral-950 text-neutral-400 uppercase font-bold text-[10px] tracking-wider shadow-sm">
+                    <tr>
+                      <th className="py-3 px-4 bg-neutral-950 sticky top-0">Perusahaan / Tugas</th>
+                      <th className="py-3 px-4 bg-neutral-950 sticky top-0">Posisi</th>
+                      <th className="py-3 px-4 bg-neutral-950 sticky top-0">Lokasi</th>
+                      <th className="py-3 px-4 bg-neutral-950 sticky top-0">Platform</th>
+                      <th className="py-3 px-4 bg-neutral-950 sticky top-0">Tanggal Apply</th>
+                      <th className="py-3 px-4 bg-neutral-950 sticky top-0">Status</th>
+                      <th className="py-3 px-4 text-right bg-neutral-950 sticky top-0">Aksi</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-800">

@@ -31,15 +31,15 @@ export function TableSkeleton() {
     <div
       role="status"
       aria-label="Memuat tabel data lamaran"
-      className="bg-[#0d0d0d] border border-neutral-800 rounded-xl overflow-hidden shadow-2xl"
+      className="bg-[#0d0d0d] border border-neutral-800 rounded-xl overflow-hidden shadow-2xl h-full flex flex-col"
     >
-      <div className="p-4 border-b border-neutral-800/80 flex items-center justify-between text-xs text-neutral-400">
+      <div className="p-4 border-b border-neutral-800/80 flex items-center justify-between text-xs text-neutral-400 shrink-0">
         <span className="font-bold tracking-wider uppercase text-[11px] text-neutral-300">
           Memuat Daftar Lamaran...
         </span>
         <span className="text-[10px] text-neutral-500 animate-pulse">Sinkronisasi data</span>
       </div>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto overflow-y-auto flex-1 min-h-0">
         <table className="w-full text-left border-collapse text-xs min-w-[720px]">
           <thead>
             <tr className="border-b border-neutral-800 bg-neutral-950 text-neutral-500 uppercase font-bold text-[10px] tracking-wider">
