@@ -25,14 +25,31 @@ const statusBadgeStyles = {
   Ditolak: "border-red-500/50 bg-red-500/10 text-red-300",
 };
 
+// Helper normalisasi tanggal ke format YYYY-MM-DD tanpa skew timezone
+const toDateKey = (dateInput) => {
+  if (!dateInput) return "";
+  if (typeof dateInput === "string") {
+    const datePart = dateInput.split("T")[0].split(" ")[0];
+    if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+      return datePart;
+    }
+  }
+  const d = new Date(dateInput);
+  if (Number.isNaN(d.getTime())) return "";
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 // Helper Generate 14 Hari Kalender Timeline Gantt
-const generateTimelineDates = () => {
+const generateTimelineDates = (offsetDays = -6) => {
   const dates = [];
   const today = new Date();
 
-  // Ambil mulai 2 hari lalu agar timeline seimbang
+  // Ambil mulai dari offsetDays agar rentang waktu mencakup tanggal apply sebelum dan setelahnya
   const startDate = new Date(today);
-  startDate.setDate(today.getDate() - 2);
+  startDate.setDate(today.getDate() + offsetDays);
 
   const dayNames = ["MIN", "SEN", "SEL", "RAB", "KAM", "JUM", "SAB"];
   const monthNames = [
@@ -50,14 +67,18 @@ const generateTimelineDates = () => {
     "Des",
   ];
 
+  const todayKey = toDateKey(today);
+
   for (let i = 0; i < 14; i++) {
     const d = new Date(startDate);
     d.setDate(startDate.getDate() + i);
+    const dateKey = toDateKey(d);
     dates.push({
       fullDate: d,
-      dateKey: d.toISOString().split("T")[0],
+      dateKey,
       dayName: dayNames[d.getDay()],
       dateLabel: `${d.getDate()} ${monthNames[d.getMonth()]}`,
+      isToday: dateKey === todayKey,
     });
   }
   return dates;
@@ -85,8 +106,14 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
-  // 14 Hari Kolender Timeline
-  const timelineDates = useMemo(() => generateTimelineDates(), []);
+  // Offset hari timeline (default -6 agar hari ini berada di tengah-tengah rentang 14 hari)
+  const [timelineOffset, setTimelineOffset] = useState(-6);
+
+  // 14 Hari Kalender Timeline
+  const timelineDates = useMemo(
+    () => generateTimelineDates(timelineOffset),
+    [timelineOffset],
+  );
 
   const fetchApplications = async () => {
     setLoading(true);
@@ -115,7 +142,9 @@ export default function Dashboard() {
       await updateApplication(id, { status: newStatus });
       setApplications((prev) =>
         prev.map((app) =>
-          (app.id || app._id) === id ? { ...app, status: newStatus } : app,
+          (app.id || app._id) === id
+            ? { ...app, status: newStatus, updated_at: new Date().toISOString() }
+            : app,
         ),
       );
     } catch {
@@ -168,33 +197,77 @@ export default function Dashboard() {
     [filteredApplications],
   );
 
-  // Hitung Posisi Gantt Grid Bar
-  const getBarPosition = (appliedDateStr, status) => {
-    let startIndex = 2;
+  // Menentukan tanggal mulai: tanggal apply atau tanggal update status
+  const getAppStartDate = (app) => {
+    // Jika status bukan Applied, prioritaskan tanggal update status
+    if (app.status && app.status !== "Applied") {
+      // 1. Cek history perubahan status jika ada
+      if (app.application_status_history?.length > 0) {
+        const matching = app.application_status_history
+          .filter((h) => h.status === app.status && h.changed_at)
+          .sort((a, b) => new Date(b.changed_at) - new Date(a.changed_at));
+        if (matching.length > 0) return matching[0].changed_at;
 
-    if (appliedDateStr) {
-      const appDate = new Date(appliedDateStr).toISOString().split("T")[0];
-      const foundIdx = timelineDates.findIndex((d) => d.dateKey === appDate);
-      if (foundIdx !== -1) {
-        startIndex = foundIdx;
+        const latest = app.application_status_history
+          .filter((h) => h.changed_at)
+          .sort((a, b) => new Date(b.changed_at) - new Date(a.changed_at));
+        if (latest.length > 0) return latest[0].changed_at;
+      }
+
+      // 2. Cek updated_at jika status telah diperbarui
+      if (app.updated_at) {
+        return app.updated_at;
       }
     }
 
-    let durationDays;
+    // Default: tanggal apply atau created_at
+    return app.applied_date || app.created_at || new Date().toISOString();
+  };
+
+  // Hitung Posisi Gantt Grid Bar berdasarkan tanggal mulai aktual
+  const getBarPosition = (startDateStr, status) => {
+    if (!timelineDates.length) return { gridStart: 2, gridEnd: 8, isVisible: true };
+
+    const firstDateKey = timelineDates[0].dateKey;
+    const targetDateKey = toDateKey(startDateStr);
+
+    const startObj = new Date(targetDateKey + "T00:00:00");
+    const firstObj = new Date(firstDateKey + "T00:00:00");
+
+    let durationDays = 6;
     if (["Offering", "Offer", "Diterima"].includes(status)) {
       durationDays = 7;
     } else if (status === "Interview") {
       durationDays = 5;
     } else if (status === "Rejected" || status === "Ditolak") {
       durationDays = 3;
-    } else {
-      durationDays = 6;
     }
 
-    const gridStart = startIndex + 2; // +2 karena Kolom 1 = NAMA TUGAS
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+    const diffDays = Math.round((startObj.getTime() - firstObj.getTime()) / ONE_DAY_MS);
+
+    // Jika mulai setelah rentang tanggal yang sedang ditampilkan
+    if (diffDays >= timelineDates.length) {
+      return { gridStart: 0, gridEnd: 0, isVisible: false };
+    }
+
+    // Jika mulai sebelum rentang tanggal yang sedang ditampilkan
+    if (diffDays < 0) {
+      const remainingDuration = durationDays + diffDays;
+      const isOngoing = !["Offering", "Offer", "Diterima", "Rejected", "Ditolak"].includes(status);
+      if (remainingDuration <= 0 && !isOngoing) {
+        return { gridStart: 0, gridEnd: 0, isVisible: false };
+      }
+      const gridStart = 2; // Mulai dari kolom tanggal pertama
+      const gridEnd = Math.min(gridStart + Math.max(1, remainingDuration), 16);
+      return { gridStart, gridEnd, isVisible: true };
+    }
+
+    // Berada di dalam rentang timeline
+    const gridStart = diffDays + 2; // +2 karena Kolom 1 = NAMA TUGAS
     const gridEnd = Math.min(gridStart + durationDays, 16);
 
-    return { gridStart, gridEnd };
+    return { gridStart, gridEnd, isVisible: true };
   };
 
   return (
@@ -326,7 +399,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="bg-[#0d0d0d] border border-neutral-800 rounded-2xl p-6 shadow-2xl space-y-4 overflow-hidden flex-1 min-h-0 flex flex-col">
-            {/* Header + Legend persis screenshot */}
+            {/* Header + Legend + Navigator */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
               <div>
                 <h1 className="text-xl font-bold text-white tracking-tight">
@@ -337,14 +410,45 @@ export default function Dashboard() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-6 text-[11px] font-bold tracking-wider">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block shadow-sm shadow-blue-500"></span>
-                  <span className="text-neutral-300">IN PROGRESS</span>
+              <div className="flex flex-wrap items-center gap-4 text-[11px]">
+                {/* Navigator Rentang Tanggal */}
+                <div className="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 rounded-lg p-1 font-bold">
+                  <button
+                    onClick={() => setTimelineOffset((prev) => prev - 7)}
+                    title="Geser 7 hari ke belakang"
+                    className="px-2.5 py-1 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded transition"
+                  >
+                    ← 7 Hari
+                  </button>
+                  <button
+                    onClick={() => setTimelineOffset(-6)}
+                    className="px-2.5 py-1 text-neutral-200 hover:text-white bg-neutral-800 rounded transition text-[11px]"
+                  >
+                    Hari Ini
+                  </button>
+                  <button
+                    onClick={() => setTimelineOffset((prev) => prev + 7)}
+                    title="Geser 7 hari ke depan"
+                    className="px-2.5 py-1 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded transition"
+                  >
+                    7 Hari →
+                  </button>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shadow-sm shadow-emerald-500"></span>
-                  <span className="text-neutral-300">SELESAI</span>
+
+                {/* Legend */}
+                <div className="flex items-center gap-4 font-bold tracking-wider">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block shadow-sm shadow-blue-500"></span>
+                    <span className="text-neutral-300">IN PROGRESS</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shadow-sm shadow-emerald-500"></span>
+                    <span className="text-neutral-300">SELESAI</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block shadow-sm shadow-red-500"></span>
+                    <span className="text-neutral-300">CLOSED</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -364,12 +468,20 @@ export default function Dashboard() {
                     {timelineDates.map((item, idx) => (
                       <div
                         key={idx}
-                        className="p-2.5 text-center border-r border-neutral-800/80 last:border-r-0 flex flex-col justify-center items-center"
+                        className={`p-2.5 text-center border-r border-neutral-800/80 last:border-r-0 flex flex-col justify-center items-center transition-colors ${
+                          item.isToday
+                            ? "bg-blue-500/10 border-b-2 border-b-blue-500"
+                            : ""
+                        }`}
                       >
-                        <span className="text-[10px] font-extrabold text-neutral-400 uppercase tracking-wider">
+                        <span className={`text-[10px] font-extrabold uppercase tracking-wider ${
+                          item.isToday ? "text-blue-400" : "text-neutral-400"
+                        }`}>
                           {item.dayName}
                         </span>
-                        <span className="text-xs font-bold text-white mt-0.5">
+                        <span className={`text-xs font-bold mt-0.5 ${
+                          item.isToday ? "text-blue-300 font-extrabold" : "text-white"
+                        }`}>
                           {item.dateLabel}
                         </span>
                       </div>
@@ -386,8 +498,9 @@ export default function Dashboard() {
                         app.position ||
                         "Tugas Baru";
                       const status = app.status || "Applied";
-                      const { gridStart, gridEnd } = getBarPosition(
-                        app.applied_date,
+                      const startDateStr = getAppStartDate(app);
+                      const { gridStart, gridEnd, isVisible } = getBarPosition(
+                        startDateStr,
                         status,
                       );
 
@@ -425,17 +538,23 @@ export default function Dashboard() {
                             ></div>
                           ))}
 
-                          <div
-                            style={{
-                              gridColumnStart: gridStart,
-                              gridColumnEnd: gridEnd,
-                            }}
-                            className={`absolute left-1 right-1 h-9 rounded-xl border ${barStyle} px-3 flex items-center shadow-lg transition-all duration-300 z-0`}
-                          >
-                            <span className="text-[11px] font-semibold tracking-wide truncate">
-                              {statusLabel}
-                            </span>
-                          </div>
+                          {isVisible ? (
+                            <div
+                              style={{
+                                gridColumnStart: gridStart,
+                                gridColumnEnd: gridEnd,
+                              }}
+                              className={`absolute left-1 right-1 h-9 rounded-xl border ${barStyle} px-3 flex items-center shadow-lg transition-all duration-300 z-0`}
+                            >
+                              <span className="text-[11px] font-semibold tracking-wide truncate">
+                                {statusLabel} • {formatDate(startDateStr)}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="absolute left-[228px] text-[10px] text-neutral-500 font-mono italic pointer-events-none">
+                              (Mulai: {formatDate(startDateStr)})
+                            </div>
+                          )}
                         </div>
                       );
                     })}
