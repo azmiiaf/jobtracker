@@ -550,7 +550,7 @@ export default function Dashboard() {
                       <th className="py-3 px-4 bg-neutral-950 sticky top-0">Perusahaan / Tugas</th>
                       <th className="py-3 px-4 bg-neutral-950 sticky top-0">Posisi</th>
                       <th className="py-3 px-4 bg-neutral-950 sticky top-0">Lokasi</th>
-                      <th className="py-3 px-4 bg-neutral-950 sticky top-0">Platform</th>
+                      <th className="py-3 px-4 bg-neutral-950 sticky top-0">Work Type</th>
                       <th className="py-3 px-4 bg-neutral-950 sticky top-0">Tanggal Apply</th>
                       <th className="py-3 px-4 bg-neutral-950 sticky top-0">Status</th>
                       <th className="py-3 px-4 text-right bg-neutral-950 sticky top-0">Aksi</th>
@@ -562,7 +562,7 @@ export default function Dashboard() {
                       const company = app.company_name || app.company || "-";
                       const position = app.position || app.job_title || "-";
                       const location = app.location || "-";
-                      const platform = app.source || app.platform || "-";
+                      const workType = app.work_type || "On-Site";
                       const appliedDate = formatDate(app.applied_date);
                       return (
                         <tr
@@ -574,13 +574,18 @@ export default function Dashboard() {
                             {company}
                           </td>
                           <td className="py-3.5 px-4 text-neutral-700">
-                            {position}
+                            <div>{position}</div>
+                            {app.job_type && (
+                              <span className="text-[10px] text-neutral-400 font-mono">
+                                {app.job_type}
+                              </span>
+                            )}
                           </td>
                           <td className="py-3.5 px-4 text-neutral-600">
                             {location}
                           </td>
                            <td className="py-3.5 px-4 text-neutral-600">
-                             {platform}
+                             {workType}
                            </td>
                            <td className="py-3.5 px-4 text-neutral-600">
                              {appliedDate}

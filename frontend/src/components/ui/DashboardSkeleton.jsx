@@ -46,7 +46,7 @@ export function TableSkeleton() {
               <th className="py-3 px-4">Perusahaan / Tugas</th>
               <th className="py-3 px-4">Posisi</th>
               <th className="py-3 px-4">Lokasi</th>
-              <th className="py-3 px-4">Platform</th>
+              <th className="py-3 px-4">Work Type</th>
               <th className="py-3 px-4">Tanggal Apply</th>
               <th className="py-3 px-4">Status</th>
               <th className="py-3 px-4 text-right">Aksi</th>

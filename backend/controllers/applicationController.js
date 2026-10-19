@@ -6,6 +6,7 @@ const applicationFields = [
   "job_url",
   "description",
   "location",
+  "job_type",
   "work_type",
   "salary_min",
   "salary_max",
@@ -20,7 +21,6 @@ const pickApplicationFields = (body) => {
     if (body[field] !== undefined && body[field] !== "")
       payload[field] = body[field];
   }
-  if (body.job_type && !payload.work_type) payload.work_type = body.job_type;
   if (body.link && !payload.job_url) payload.job_url = body.link;
   return payload;
 };

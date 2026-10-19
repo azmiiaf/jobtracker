@@ -27,6 +27,7 @@ export default function CreateApplicationModal({ isOpen, onClose, onSuccess }) {
     position: "",
     location: "",
     job_type: "Full Time",
+    work_type: "On-Site",
     source: "LinkedIn",
     job_url: "",
     applied_date: new Date().toISOString().split("T")[0],
@@ -62,7 +63,8 @@ export default function CreateApplicationModal({ isOpen, onClose, onSuccess }) {
       company_name: formData.company_name,
       position: formData.position,
       location: formData.location,
-      work_type: formData.job_type,
+      job_type: formData.job_type,
+      work_type: formData.work_type,
       job_url: formData.job_url,
       source,
       status: "Applied",
@@ -86,6 +88,7 @@ export default function CreateApplicationModal({ isOpen, onClose, onSuccess }) {
         position: "",
         location: "",
         job_type: "Full Time",
+        work_type: "On-Site",
         source: "LinkedIn",
         job_url: "",
         applied_date: new Date().toISOString().split("T")[0],
@@ -157,23 +160,24 @@ export default function CreateApplicationModal({ isOpen, onClose, onSuccess }) {
             />
           </div>
 
+          <div>
+            <label className="block mb-1 text-neutral-400 font-bold uppercase">
+              Lokasi
+            </label>
+            <input
+              type="text"
+              name="location"
+              placeholder="Contoh: Jakarta / Cikarang"
+              value={formData.location}
+              onChange={handleChange}
+              className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-white focus:outline-none focus:border-neutral-500"
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block mb-1 text-neutral-400 font-bold uppercase">
-                Lokasi
-              </label>
-              <input
-                type="text"
-                name="location"
-                placeholder="Cikarang Selatan"
-                value={formData.location}
-                onChange={handleChange}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-white focus:outline-none focus:border-neutral-500"
-              />
-            </div>
-            <div>
-              <label className="block mb-1 text-neutral-400 font-bold uppercase">
-                Tipe Kerja
+                Job Type
               </label>
               <select
                 name="job_type"
@@ -185,6 +189,21 @@ export default function CreateApplicationModal({ isOpen, onClose, onSuccess }) {
                 <option value="Part Time">Part Time</option>
                 <option value="Contract">Contract</option>
                 <option value="Internship">Internship</option>
+                <option value="Freelance">Freelance</option>
+              </select>
+            </div>
+            <div>
+              <label className="block mb-1 text-neutral-400 font-bold uppercase">
+                Work Type
+              </label>
+              <select
+                name="work_type"
+                value={formData.work_type}
+                onChange={handleChange}
+                className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-white focus:outline-none focus:border-neutral-500"
+              >
+                <option value="On-Site">On-Site</option>
+                <option value="Hybrid">Hybrid</option>
                 <option value="Remote">Remote</option>
               </select>
             </div>

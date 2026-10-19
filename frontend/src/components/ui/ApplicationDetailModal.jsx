@@ -153,7 +153,8 @@ export default function ApplicationDetailModal({
         company_name: cached.company_name || "",
         position: cached.position || "",
         location: cached.location || "",
-        work_type: cached.work_type || "Full Time",
+        job_type: cached.job_type || "Full Time",
+        work_type: cached.work_type || "On-Site",
         applied_date: cached.applied_date?.split("T")[0] || "",
         source: cached.source || "Other",
         job_url: cached.job_url || "",
@@ -188,7 +189,8 @@ export default function ApplicationDetailModal({
           company_name: detail.company_name || "",
           position: detail.position || "",
           location: detail.location || "",
-          work_type: detail.work_type || "Full Time",
+          job_type: detail.job_type || "Full Time",
+          work_type: detail.work_type || "On-Site",
           applied_date: detail.applied_date?.split("T")[0] || "",
           source: detail.source || "Other",
           job_url: detail.job_url || "",
@@ -417,11 +419,11 @@ export default function ApplicationDetailModal({
                       </label>
                       <label className="space-y-1">
                         <span className="block text-neutral-500">
-                          TIPE KERJA
+                          JOB TYPE
                         </span>
                         <select
-                          name="work_type"
-                          value={editForm.work_type || "Full Time"}
+                          name="job_type"
+                          value={editForm.job_type || "Full Time"}
                           onChange={handleEditChange}
                           className="w-full border border-neutral-400 bg-white px-3 py-2 text-neutral-900 outline-none focus:border-black"
                         >
@@ -429,6 +431,21 @@ export default function ApplicationDetailModal({
                           <option>Part Time</option>
                           <option>Contract</option>
                           <option>Internship</option>
+                          <option>Freelance</option>
+                        </select>
+                      </label>
+                      <label className="space-y-1">
+                        <span className="block text-neutral-500">
+                          WORK TYPE
+                        </span>
+                        <select
+                          name="work_type"
+                          value={editForm.work_type || "On-Site"}
+                          onChange={handleEditChange}
+                          className="w-full border border-neutral-400 bg-white px-3 py-2 text-neutral-900 outline-none focus:border-black"
+                        >
+                          <option>On-Site</option>
+                          <option>Hybrid</option>
                           <option>Remote</option>
                         </select>
                       </label>
@@ -511,7 +528,7 @@ export default function ApplicationDetailModal({
                       </button>
                     </div>
                     {/* Info Metadata */}
-                    <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                       <div className="p-3 bg-neutral-100 rounded border border-neutral-200">
                         <span className="text-neutral-400 font-mono text-[10px] block mb-1">
                           LOKASI
@@ -522,10 +539,18 @@ export default function ApplicationDetailModal({
                       </div>
                       <div className="p-3 bg-neutral-100 rounded border border-neutral-200">
                         <span className="text-neutral-400 font-mono text-[10px] block mb-1">
-                          TIPE KERJA
+                          JOB TYPE
                         </span>
                         <span className="font-bold">
-                          {data?.work_type || "-"}
+                          {data?.job_type || "Full Time"}
+                        </span>
+                      </div>
+                      <div className="p-3 bg-neutral-100 rounded border border-neutral-200">
+                        <span className="text-neutral-400 font-mono text-[10px] block mb-1">
+                          WORK TYPE
+                        </span>
+                        <span className="font-bold">
+                          {data?.work_type || "On-Site"}
                         </span>
                       </div>
                       <div className="p-3 bg-neutral-100 rounded border border-neutral-200">
@@ -536,9 +561,9 @@ export default function ApplicationDetailModal({
                           {formatDate(data?.applied_date)}
                         </span>
                       </div>
-                      <div className="p-3 bg-neutral-100 rounded border border-neutral-200">
+                      <div className="p-3 bg-neutral-100 rounded border border-neutral-200 col-span-2 sm:col-span-1">
                         <span className="text-neutral-400 font-mono text-[10px] block mb-1">
-                          SUMBER LAMARAN
+                          SUMBER / PLATFORM
                         </span>
                         <span className="font-bold">{data?.source || "-"}</span>
                       </div>

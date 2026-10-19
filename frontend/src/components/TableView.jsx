@@ -14,7 +14,7 @@ export default function TableView({ applications = [], onSelectApp }) {
             <th className="py-3 px-4">Perusahaan</th>
             <th className="py-3 px-4">Posisi</th>
             <th className="py-3 px-4">Lokasi</th>
-            <th className="py-3 px-4">Tipe</th>
+            <th className="py-3 px-4">Work Type</th>
             <th className="py-3 px-4">Status</th>
             <th className="py-3 px-4 text-right">Aksi</th>
           </tr>
@@ -37,7 +37,7 @@ export default function TableView({ applications = [], onSelectApp }) {
                   {app.location || '-'}
                 </td>
                 <td className="py-3.5 px-4 text-neutral-500 dark:text-neutral-400">
-                  {app.work_type || 'Full Time'}
+                  {app.work_type || 'On-Site'}
                 </td>
                 <td className="py-3.5 px-4">
                   <span className={`inline-block px-2 py-0.5 border rounded uppercase text-[10px] font-semibold ${statusStyles[app.status] || statusStyles.Applied}`}>
